@@ -25,7 +25,9 @@ func (b *base) Create(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error checking for stream conflicts : %w", err,
@@ -49,7 +51,9 @@ func (b *base) Create(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error inserting new event : %w", err,
@@ -60,7 +64,9 @@ func (b *base) Create(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error commiting transaction: %w", err,
@@ -95,7 +101,9 @@ func (b *base) Update(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error checking for version validity: %w", err,
@@ -119,7 +127,9 @@ func (b *base) Update(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error inserting new event : %w", err,
@@ -130,7 +140,9 @@ func (b *base) Update(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error commiting transaction: %w", err,
@@ -164,7 +176,9 @@ func (b *base) Delete(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error checking for version validity: %w", err,
@@ -188,7 +202,9 @@ func (b *base) Delete(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error inserting new event : %w", err,
@@ -199,7 +215,9 @@ func (b *base) Delete(
   if err != nil {
     rberr := tx.Rollback()
     if rberr != nil {
-      err = fmt.Errorf("%w: %w", rberr, err)
+      return nil, fmt.Errorf(
+        "error checking for stream conflicts, error rolling back : %w", rberr,
+      )
     }
     return nil, fmt.Errorf(
       "error commiting transaction: %w", err,
