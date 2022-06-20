@@ -3,7 +3,7 @@ package common
 import "database/sql"
 
 type IDatabaseContext interface {
-	Beginx() (*IDatabaseTransaction, error)
+	Beginx() (IDatabaseTransaction, error)
 }
 
 type IDatabaseTransaction interface {
@@ -26,4 +26,8 @@ type IDatabaseTransaction interface {
 
 	Commit() error
 	Rollback() error
+}
+
+type INotifier interface {
+	EnqueueEventNotification(*Event)
 }

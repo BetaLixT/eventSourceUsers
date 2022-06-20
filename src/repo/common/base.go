@@ -3,65 +3,108 @@ package common
 import "fmt"
 
 type base struct {
-  dbctx *IDatabaseContext
+  dbctx IDatabaseContext
+  notifier INotifier
 }
 
 func (b *base) Create(
   stream string,
   streamId string,
   newObj interface{},
-) (Event, interface{}, error) {
-  tx, err := (*b.dbctx).Beginx()
+) (*Event, error) {
+  tx, err := b.dbctx.Beginx()
   if err != nil {
-    return Event{}, nil, fmt.Errorf(
+    return nil, fmt.Errorf(
       "error creating transaction: %w", err,
     )
   }
   chck := ExistsEntity{}
 
   // - Test if exists in stream
-  err = (*tx).Get(&chck, CHECK_STREAM_EXISTS, stream, streamId)
+  err = tx.Get(&chck, CHECK_STREAM_EXISTS_QUERY, stream, streamId)
   if err != nil {
-    rberr := (*tx).Rollback()
+    rberr := tx.Rollback()
     if rberr != nil {
       err = fmt.Errorf("%w: %w", rberr, err)
     }
-    return Event{}, nil, fmt.Errorf(
+    return nil, fmt.Errorf(
       "error checking for stream conflicts : %w", err,
     )
   }
   if chck.Exists {
-    _ = (*tx).Rollback() 
-    return Event{}, nil, &RepoError{code: ERROR_STREAM_CONFLICT}
+    _ = tx.Rollback() 
+    return nil, &RepoError{code: ERROR_STREAM_CONFLICT}
   }
 
-  err = (*tx).Commit();
+  var newEvent Event
+  err = tx.Get(
+    &newEvent,
+    INSERT_EVENT_QUERY,
+    stream,
+    streamId,
+    0,
+    CREATED_EVENT,
+    newObj,
+  )
   if err != nil {
-    rberr := (*tx).Rollback()
+    rberr := tx.Rollback()
     if rberr != nil {
       err = fmt.Errorf("%w: %w", rberr, err)
     }
-    return Event{}, nil, fmt.Errorf(
+    return nil, fmt.Errorf(
+      "error inserting new event : %w", err,
+    )
+  }
+  
+  err = tx.Commit();
+  if err != nil {
+    rberr := tx.Rollback()
+    if rberr != nil {
+      err = fmt.Errorf("%w: %w", rberr, err)
+    }
+    return nil, fmt.Errorf(
       "error commiting transaction: %w", err,
     ) 
   }
+  b.notifier.EnqueueEventNotification(&newEvent)
+  return &newEvent, nil
 }
 
-func (b *base) Update(int, interface{}) (Event, interface{}) {
+func (b *base) Update(
+  stream string,
+  streamId string,
+  fromVer int,
+  update interface{},
+) (*Event, error) {
 
 }
-func (b *base) Delete(int, interface{}) (Event, interface{}) {
+
+func (b *base) Delete(
+  stream string,
+  streamId string,
+  fromVer int,
+) (*Event, error) {
 
 }
 
 const (
-  CHECK_STREAM_EXISTS = `
+  CREATED_EVENT = "Created"
+  
+  CHECK_STREAM_EXISTS_QUERY = `
     SELECT EXISTS(
       SELECT * FROM events
       WHERE stream = ($1) && streamid = ($2)
     ) as exists`
 
-  INSERT_EVENT = `
-
+  INSERT_EVENT_QUERY = `
+    INSERT INTO events (
+      stream,
+      streamid,
+      streamversion,
+      event,
+      data
+    ) VALUES (
+      $1, $2, $3, $4, $5
+    )
   `
 )
