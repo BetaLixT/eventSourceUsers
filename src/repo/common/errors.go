@@ -5,15 +5,16 @@ import (
 )
 
 type RepoError struct {
-  code int
+	code int
 }
 
 func (err *RepoError) Error() string {
-  return fmt.Sprintf("RepoError - %d", err.code)
+	return fmt.Sprintf("RepoError - %d", err.code)
 }
 
 var _ error = (*RepoError)(nil)
 
 const (
-  ERROR_STREAM_CONFLICT = 1000
+	ERROR_STREAM_CONFLICT = 1000
+	ERROR_VERSION_INVALID = 1001
 )
